@@ -35,6 +35,17 @@ namespace :db do
       SerializationHelper::Base.new(helper).load(db_dump_data_file helper.extension)
     end
 
+    desc "Load contents of file from url into database"
+    task :load_url, [:url] => [:environment] do |t, args|
+      uri = URI(args[:url])
+      open(db_dump_data_file, 'w') do |file|
+        file << Net::HTTP.get(uri)
+      end
+      format_class = ENV['class'] || "YamlDb::Helper"
+      helper = format_class.constantize
+      SerializationHelper::Base.new(helper).load(db_dump_data_file helper.extension)
+    end
+
     desc "Load contents of db/data_dir into database"
     task :load_dir  => :environment do
       dir = ENV['dir'] || "base"
